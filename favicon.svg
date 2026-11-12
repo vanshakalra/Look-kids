@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 30 710 310" width="1420" height="620" fill="none" stroke="#2F5D8A" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+<title>Look</title>
+<path d="M80 110 V310 H150"/>
+<path d="M170 255 C150 130 230 95 340 95 C450 95 530 130 510 255"/>
+<path d="M206 130 L186 60 L262 102"/>
+<path d="M474 130 L494 60 L418 102"/>
+<circle cx="255" cy="250" r="60"/>
+<circle cx="425" cy="250" r="60"/>
+<circle cx="257" cy="250" r="19" fill="#2F5D8A" stroke="none"/>
+<circle cx="423" cy="250" r="19" fill="#2F5D8A" stroke="none"/>
+<circle cx="264" cy="243" r="6" fill="#EAF5FB" stroke="none"/>
+<circle cx="430" cy="243" r="6" fill="#EAF5FB" stroke="none"/>
+<path d="M327 222 L353 222 L340 250 Z" fill="#F7B731" stroke="#F7B731" stroke-width="6"/>
+<path d="M560 110 V310"/>
+<path d="M562 240 L628 180"/>
+<path d="M588 226 L632 310"/>
+</svg>
