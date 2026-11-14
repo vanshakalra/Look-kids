@@ -1,7 +1,7 @@
 /* LOOK login: mobile number -> 4-digit OTP (demo code 1234) */
-const safeNext=(()=>{const n=new URLSearchParams(location.search).get("next")||"index.html";return/^(index|cart|pdp)\.html$/.test(n)?n:"index.html"})();
+const safeNext=(()=>{const n=new URLSearchParams(location.search).get("next")||"index.html";return/^(index|shop|cart|pdp)\.html$/.test(n)?n:"index.html"})();
 renderHeader({page:"login"});
-$("#wishBtn").onclick=()=>{try{sessionStorage.setItem("look-kids-f2",JSON.stringify({quick:["wish"]}))}catch{}location.href="index.html"};
+$("#wishBtn").onclick=()=>{location.href="shop.html?wish=1"};
 document.body.classList.add("loginpg");
 {const s=document.createElement("style");s.textContent="@media(max-width:767px){.top{display:none}}";document.head.appendChild(s)}
 document.body.insertAdjacentHTML("beforeend",`<div class="atop"><a class="logo" href="index.html" aria-label="LOOK home"><span>L<em>OO</em>K</span></a><a class="skip2" href="${safeNext}">Skip</a></div>

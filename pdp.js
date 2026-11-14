@@ -4,19 +4,23 @@ const RUPEE=INR;
 const p=byId(new URLSearchParams(location.search).get("id"))||PRODUCTS[0],c=p.colors[0],C=COLORS[c],st=stockOf(p,c),pi=priceInfo(p);
 document.title=`${p.name} – Look`;
 let size=null;
-const VIEWS=[{o:"50% 20%",s:1,l:"Front"},{o:"50% 10%",s:1.9,l:"Face & top"},{o:"50% 58%",s:1.9,l:"Fabric detail"},{o:"50% 96%",s:1.9,l:"Bottom & shoes"}];
+const CLOTH=catOf(p)==="Clothing",CAT=catOf(p),SZ=p.sizes||SIZES;
+const VIEWS=CLOTH?[{o:"50% 20%",s:1,l:"Front"},{o:"50% 10%",s:1.9,l:"Face & top"},{o:"50% 58%",s:1.9,l:"Fabric detail"},{o:"50% 96%",s:1.9,l:"Bottom & shoes"}]:[{o:"50% 50%",s:1,l:"Front"},{o:"50% 45%",s:1.5,l:"Close-up"},{o:"50% 60%",s:1.8,l:"Detail"}];
 const CHART=[["2Y","2 yrs","92","52"],["3Y","3 yrs","98","54"],["4Y","4 yrs","104","56"],["5Y","5 yrs","110","58"],["6Y","6 yrs","116","60"],["8Y","8 yrs","128","64"]];
 const heartSvg=`<svg width="20" height="19" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20s-9-5.5-9-12.2A5 5 0 0112 5a5 5 0 019 2.8C21 14.5 12 20 12 20z"/></svg>`;
 const what=p.type==="Dress"?"dress":p.type==="Set"?"set":"outfit";
-const bullets=[["Fabric",p.fabric],["Fit",p.fit],["Neckline / style",p.neck],["Type",p.type],["Wash care","Machine wash cold, gentle cycle"],["Origin","Made in India"]];
-const REV=[["Aanya's mom","5","Soft fabric and the colours are exactly like the photos. My daughter refuses to take it off!"],["Rohan K.","4","Good stitching and true to size. Went one size up for room to grow."],["Meera S.","5","Washed three times and no fading. Worth the price."]];
-const others=PRODUCTS.filter(x=>x.id!==p.id);
+const bullets=CLOTH?[["Fabric",p.fabric],["Fit",p.fit],["Neckline / style",p.neck],["Type",p.type],["Wash care","Machine wash cold, gentle cycle"],["Origin","Made in India"]]:[["Suitable for",p.age],[CAT==="Personal care"?"Made with":"Material",p.fabric],["Type",p.style],["Good to know",p.note],["Origin","Made in India"]];
+const sizeLabel=CAT==="Personal care"?"Select pack size":"Select option";
+const DESC=CLOTH?`A playful ${what} made for busy days. Soft ${p.fabric.toLowerCase()} that's gentle on little skin, a ${p.fit.toLowerCase()} fit for easy movement and stitching that holds up to play, school and everything in between.`:CAT==="Personal care"?`A gentle, ${p.fabric.toLowerCase()} formula made for little ones (${p.age}). ${p.note}. Dermatologically tested and free from harsh chemicals.`:CAT==="Toys"?`Thoughtfully made for ages ${p.age}. ${p.note}. Built from ${p.fabric.toLowerCase()} to survive big play sessions and be passed on to the next little one.`:`A lovely thing to give or keep. ${p.note}. Suitable for ${p.age}.`;
+const REV0=[["Aanya's mom","5","Soft fabric and the colours are exactly like the photos. My daughter refuses to take it off!"],["Rohan K.","4","Good stitching and true to size. Went one size up for room to grow."],["Meera S.","5","Washed three times and no fading. Worth the price."]];
+const REV=CLOTH?REV0:CAT==="Personal care"?[["Aanya's mom","5","Gentle on my baby's skin, no irritation and the smell is lovely."],["Rohan K.","4","Lasts long and a little goes a long way. Will reorder."],["Meera S.","5","Finally something I trust for my toddler."]]:[["Aanya's mom","5","Beautifully made and my daughter plays with it every day."],["Rohan K.","4","Sturdy, safe and looks just like the photos."],["Meera S.","5","Perfect gift. The packaging was lovely too."]];
+const others=[...PRODUCTS.filter(x=>x.id!==p.id&&catOf(x)===CAT),...PRODUCTS.filter(x=>x.id!==p.id&&catOf(x)!==CAT)];
 const gal=VIEWS.map((v,i)=>`<button class="gt" type="button" data-i="${i}" aria-label="View ${i+1}: ${v.l}" aria-current="${i===0}"><img src="${C.img}" alt="" style="transform:scale(${v.s});transform-origin:${v.o}"></button>`).join("");
 const star=ICON.star;
 const stars=n=>Array.from({length:5},(_,i)=>`<span class="${i<n?"on":""}">★</span>`).join("");
 const dist=[[5,62],[4,25],[3,8],[2,3],[1,2]];
 document.getElementById("main").innerHTML=`
-<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><a href="index.html">Kids</a><span>/</span><b>${esc(p.name)}</b></nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><a href="shop.html?cat=${encodeURIComponent(CAT)}">${CAT==="Toys"?"Toys &amp; Games":CAT}</a><span>/</span><b>${esc(p.name)}</b></nav>
 <div class="pdp">
  <section class="gal" aria-label="Product images">
   <div class="gthumbs">${gal}</div>
@@ -33,16 +37,16 @@ document.getElementById("main").innerHTML=`
    <button type="button" class="offer" data-code="LOOK10">${ICON.tag}<span><u>LOOK10</u> · 10% off up to ₹300</span><em>Copy</em></button>
    <button type="button" class="offer" data-code="FIRST200">${ICON.tag}<span><u>FIRST200</u> · ₹200 off on ₹999+</span><em>Copy</em></button></div>
   <div class="psec"><div class="phead"><b>Colour</b><span>${C.name}</span></div><div class="pcol"><button type="button" aria-checked="true" role="radio" aria-label="${C.name}"><img src="${C.img}" alt=""></button></div></div>
-  <div class="psec" id="sizeSec"><div class="phead"><b>Select size</b><button class="plink" type="button" id="chart">${sv('<rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>',16)}Size chart</button></div>
-   <div class="sizes psz" role="radiogroup" aria-label="Size">${SIZES.map(s=>`<button class="size" role="radio" aria-checked="false" data-s="${s}" ${st[s]?"":"disabled"} aria-label="${s}${st[s]?(st[s]<=3?`, only ${st[s]} left`:""):", out of stock"}">${s}${st[s]&&st[s]<=3?`<small>${st[s]} left</small>`:""}</button>`).join("")}</div>
-   <p class="phint" id="shint" aria-live="polite">Age-wise sizes · pick the one closest to your child's age.</p></div>
+  <div class="psec" id="sizeSec"><div class="phead"><b>${CLOTH?"Select size":sizeLabel}</b>${CLOTH?`<button class="plink" type="button" id="chart">${sv('<rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>',16)}Size chart</button>`:""}</div>
+   <div class="sizes psz" role="radiogroup" aria-label="${CLOTH?"Size":"Option"}">${SZ.map(s=>`<button class="size" role="radio" aria-checked="false" data-s="${s}" ${st[s]?"":"disabled"} aria-label="${s}${st[s]?(st[s]<=3?`, only ${st[s]} left`:""):", out of stock"}">${s}${st[s]&&st[s]<=3?`<small>${st[s]} left</small>`:""}</button>`).join("")}</div>
+   <p class="phint" id="shint" aria-live="polite">${CLOTH?"Age-wise sizes · pick the one closest to your child's age.":""}</p></div>
   <div class="buy" id="buy"><button class="cta big add" id="addBtn" type="button"><span class="lbl">Add to Cart</span></button>
    <button class="wbtn" id="wishBtn2" type="button" aria-pressed="${Store.isWish(p.id)}"><span class="hi">${heartSvg}</span><span class="wl">Wishlist</span></button></div>
   <div class="pdel"><b>${ICON.truck}Delivery</b><form id="pf" novalidate><label class="sr" for="pinp">Pincode</label><input id="pinp" inputmode="numeric" maxlength="6" placeholder="Enter pincode" value="${Store.get().pin}"><button type="submit">Check</button></form><p id="dres" aria-live="polite"></p></div>
   <ul class="trust"><li>${sv('<path d="M4 12a8 8 0 018-8 8 8 0 017 4M20 12a8 8 0 01-8 8 8 8 0 01-7-4"/><path d="M19 3v5h-5M5 21v-5h5"/>',20)}<span>7-day easy returns</span></li><li>${sv('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',20)}<span>Cash on delivery</span></li><li>${sv('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',20)}<span>100% genuine</span></li></ul>
   <div class="acc">
    <details open><summary>Product details</summary><dl>${bullets.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></details>
-   <details><summary>Description</summary><p>A playful ${what} made for busy days. Soft ${esc(p.fabric.toLowerCase())} that's gentle on little skin, a ${esc(p.fit.toLowerCase())} fit for easy movement and stitching that holds up to play, school and everything in between.</p></details>
+   <details><summary>Description</summary><p>${esc(DESC)}</p></details>
    <details><summary>Delivery &amp; returns</summary><p>Free delivery on orders above ₹999. Standard delivery in ${p.days}–${p.days+2} days. Return or exchange within 7 days of delivery if the tags are intact.</p></details>
    <details><summary>Ratings &amp; reviews</summary><div class="rev"><div class="rsum"><strong>${p.rating.toFixed(1)}</strong><span class="stars">${stars(Math.round(p.rating))}</span><small>${fmtK(p.reviews)} ratings</small></div>
     <div class="bars">${dist.map(([n,w])=>`<div><span>${n}★</span><i><b style="width:${w}%"></b></i><span>${w}%</span></div>`).join("")}</div></div>
@@ -63,9 +67,10 @@ gm.addEventListener("mouseleave",()=>show(cur));
 
 /* sizes */
 const sizeSec=$("#sizeSec"),hint=$("#shint");
+if(SZ.length===1){size=SZ[0];sizeSec.hidden=true}
 $$(".psz .size").forEach(b=>b.onclick=()=>{size=b.dataset.s;$$(".psz .size").forEach(x=>x.setAttribute("aria-checked",x===b));sizeSec.classList.remove("err");
  hint.textContent=st[size]<=3?`Hurry – only ${st[size]} left in ${size}.`:`Size ${size} selected.`;hint.classList.toggle("low",st[size]<=3)});
-$("#chart").onclick=()=>openSheet({title:"Size chart",html:`<table class="szt"><thead><tr><th>Size</th><th>Age</th><th>Height (cm)</th><th>Chest (cm)</th></tr></thead><tbody>${CHART.map(r=>`<tr>${r.map((x,i)=>i?`<td>${x}</td>`:`<th>${x}</th>`).join("")}</tr>`).join("")}</tbody></table><p class="hint">Between sizes? Go one size up for room to grow.</p>`});
+if($("#chart"))$("#chart").onclick=()=>openSheet({title:"Size chart",html:`<table class="szt"><thead><tr><th>Size</th><th>Age</th><th>Height (cm)</th><th>Chest (cm)</th></tr></thead><tbody>${CHART.map(r=>`<tr>${r.map((x,i)=>i?`<td>${x}</td>`:`<th>${x}</th>`).join("")}</tr>`).join("")}</tbody></table><p class="hint">Between sizes? Go one size up for room to grow.</p>`});
 $("#hist").onclick=()=>toast(pi.verdict);
 
 /* add to cart: spinner → tick → image flies to cart → badge 1 → "Go to Cart" */
@@ -81,10 +86,10 @@ const fly=done=>{const src=gimg.getBoundingClientRect(),dst=$("#cartBtn").getBou
 addBtn.onclick=()=>{
  if(addBtn.dataset.go)return location.href="cart.html";
  if(addBtn.classList.contains("busy"))return;
- if(!size){sizeSec.classList.remove("err");void sizeSec.offsetWidth;sizeSec.classList.add("err");hint.textContent="Please select a size to add to cart.";hint.classList.add("low");sizeSec.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});return}
+ if(!size){sizeSec.classList.remove("err");void sizeSec.offsetWidth;sizeSec.classList.add("err");hint.textContent=CLOTH?"Please select a size to add to cart.":"Please choose an option to add to cart.";hint.classList.add("low");sizeSec.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});return}
  addBtn.classList.add("busy");addBtn.innerHTML='<span class="spin" aria-hidden="true"></span><span class="lbl">Adding…</span>';
  setTimeout(()=>{addBtn.classList.add("ok");addBtn.innerHTML=TICK+'<span class="lbl">Added</span>';
-  fly(()=>{Store.add(p.id,c,size);say("Added to cart, size "+size);setTimeout(()=>{addBtn.classList.remove("busy","ok");addBtn.classList.add("morph");paint();setTimeout(()=>addBtn.classList.remove("morph"),500)},380)})},calm?100:480)};
+  fly(()=>{Store.add(p.id,c,size);say("Added to cart"+(SZ.length>1?", "+size:""));setTimeout(()=>{addBtn.classList.remove("busy","ok");addBtn.classList.add("morph");paint();setTimeout(()=>addBtn.classList.remove("morph"),500)},380)})},calm?100:480)};
 
 /* wishlist: heart pop + burst */
 const burst=el=>{if(calm)return;const r=el.getBoundingClientRect();for(let i=0;i<8;i++){const s=document.createElement("i");s.className="spark";s.style.left=r.left+r.width/2+"px";s.style.top=r.top+r.height/2+"px";const a=i/8*Math.PI*2,d=26+Math.random()*10;document.body.appendChild(s);

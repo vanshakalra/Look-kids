@@ -1,6 +1,6 @@
 /* LOOK group bag: shared bag with friends - add, vote, chat. Demo sync via localStorage (same browser). */
 renderHeader({page:"group"});
-$("#wishBtn").onclick=()=>{location.href="index.html?wish=1"};
+$("#wishBtn").onclick=()=>{location.href="shop.html?wish=1"};
 document.body.insertAdjacentHTML("afterbegin",`<div class="bagbar"><button class="icon" aria-label="Back" id="bb" type="button">${ICON.back}</button><h1>Group bag</h1><span id="bn"></span></div>`);
 $("#bb").onclick=()=>history.length>1?history.back():location.href="cart.html";
 {const s=document.createElement("style");s.textContent="@media(max-width:767px){.top{display:none}}";document.head.appendChild(s)}

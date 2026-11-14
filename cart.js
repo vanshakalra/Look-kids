@@ -1,8 +1,8 @@
 /* LOOK bag page */
 renderHeader({page:"cart"});
-$("#wishBtn").onclick=()=>{location.href="index.html?wish=1"};
+$("#wishBtn").onclick=()=>{location.href="shop.html?wish=1"};
 document.body.insertAdjacentHTML("afterbegin",`<div class="bagbar" id="bagbar"><button class="icon" aria-label="Back" id="bb" type="button">${ICON.back}</button><h1>Bag</h1><span id="bn"></span><button class="tool" id="bw" aria-label="Wishlist" type="button">${ICON.heart}</button></div>`);
-$("#bb").onclick=()=>history.length>1?history.back():location.href="index.html";$("#bw").onclick=()=>location.href="index.html?wish=1";
+$("#bb").onclick=()=>history.length>1?history.back():location.href="shop.html";$("#bw").onclick=()=>location.href="shop.html?wish=1";
 {const s=document.createElement("style");s.textContent="@media(max-width:767px){.top{display:none}}";document.head.appendChild(s)}
 const FREE=999,SHIP=79;
 function totals(){const it=Store.get().items;let mrp=0,sell=0;it.forEach(i=>{const p=byId(i.pid);mrp+=p.mrp*i.qty;sell+=p.price*i.qty});
@@ -11,10 +11,10 @@ function totals(){const it=Store.get().items;let mrp=0,sell=0;it.forEach(i=>{con
   return{mrp,sell,disc:mrp-sell,cp,c,valid,after,ship,total:after+ship,best,items:it.reduce((a,i)=>a+i.qty,0)}}
 const eta=(i)=>deliverBy(byId(i.pid).days,Store.get().pin);
 const lineHTML=i=>{const p=byId(i.pid),c=COLORS[i.color],k=Store.key(i),max=Store.maxQty(i),st=stockOf(p,i.color);
- return`<li class="line" data-k="${esc(k)}"><a class="th" href="index.html" aria-label="${esc(p.name)}"><img src="${c.img}" alt=""></a>
+ return`<li class="line" data-k="${esc(k)}"><a class="th" href="pdp.html?id=${p.id}" aria-label="${esc(p.name)}"><img src="${c.img}" alt=""></a>
 <button class="rm" data-act="rm" aria-label="Remove ${esc(p.name)} from bag">${ICON.trash}</button>
 <div class="bd"><b>${esc(p.brand)}</b><span class="t">${esc(p.name)} · ${c.name}</span>
-<div class="pickers"><label class="selw"><span class="sr">Size</span><select data-sz aria-label="Size">${SIZES.filter(s=>st[s]>0||s===i.size).map(s=>`<option ${s===i.size?"selected":""}>${s}</option>`).join("")}</select>${ICON.chev}</label>
+<div class="pickers"><label class="selw"><span class="sr">Size</span><select data-sz aria-label="Size">${(p.sizes||SIZES).filter(s=>st[s]>0||s===i.size).map(s=>`<option ${s===i.size?"selected":""}>${s}</option>`).join("")}</select>${ICON.chev}</label>
 <div class="step" role="group" aria-label="Quantity"><button data-d="-1" aria-label="Decrease quantity" ${i.qty<=1?"disabled":""}>−</button><span aria-live="polite">${i.qty}</span><button data-d="1" aria-label="Increase quantity" ${i.qty>=max?"disabled":""}>+</button></div></div>
 ${i.qty>=max?`<span class="maxnote">${st[i.size]<=5?`Only ${st[i.size]} left in this size`:"Max 5 per order"}</span>`:""}
 <span class="pr"><span class="now">${INR(p.price*i.qty)}</span><s class="old">${INR(p.mrp*i.qty)}</s><span class="off">${p.disc}% Off</span></span>

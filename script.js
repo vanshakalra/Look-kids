@@ -1,14 +1,17 @@
 /* LOOK listing: discovery rows, cards, size sheet, Price Check, Filters page */
 renderHeader({page:"home"});
+const GEN=new URLSearchParams(location.search).get('g')||'';
 const F0=()=>({q:"",quick:[],types:[],styles:[],colors:[],sizes:[],brands:[],price:[],disc:0,rating:0,ship:0,fits:[],fabrics:[],necks:[],sort:"rec"});
 let F=F0();
-try{const s=JSON.parse(sessionStorage.getItem("look-kids-f2")||"null");if(s)F=Object.assign(F0(),s)}catch{}
-{const u=new URLSearchParams(location.search);if(u.get("q"))F.q=u.get("q");if(u.get("wish")==="1"&&!F.quick.includes("wish"))F.quick.push("wish")}
-const keep=()=>{try{sessionStorage.setItem("look-kids-f2",JSON.stringify(F))}catch{}};
+const SC={types:[],styles:[]};let RESTORED=false;
+try{const s=JSON.parse(sessionStorage.getItem("look-kids-f2")||"null");if(s&&s._u===location.search){F=Object.assign(F0(),s);RESTORED=true}}catch{}
+{const u=new URLSearchParams(location.search);if(!RESTORED&&(u.get("cat")||u.get("g")||u.get("style")||u.get("deal")||u.get("price")||u.get("q")||u.get("sort")||u.get("wish")))F=F0();if(u.get("q"))F.q=u.get("q");if(u.get("cat")){const m=CATS.find(x=>x[0]===u.get("cat"));if(m)F.types=m[1].split("|")}if(u.get("style"))F.styles=[u.get("style")];if(u.get("price"))F.price=[u.get("price")];if(u.get("sort"))F.sort=u.get("sort");if(u.get("deal"))F.disc=+u.get("deal");if(u.get("wish")==="1"&&!F.quick.includes("wish"))F.quick.push("wish");if(!RESTORED){}
+ SC.types=(u.get("cat")&&CATS.find(x=>x[0]===u.get("cat"))||[0,""])[1].split("|").filter(Boolean);SC.styles=u.get("style")?[u.get("style")]:[]}
+const keep=()=>{try{sessionStorage.setItem("look-kids-f2",JSON.stringify(Object.assign({_u:location.search},F)))}catch{}};
 const sel={};
-const QUICK={drop:["Winter Price Drop",p=>priceInfo(p).kind==="good",ICON.trend.replace('width="12" height="12"','width="16" height="16"')],deal:["Crazy Deal",p=>p.disc>=50,ICON.flame],top:["Top Rated",p=>p.rating>=4.4,ICON.star2],fast:["Delivery in 2 days",p=>p.days<=2],wish:["In my wishlist",p=>Store.isWish(p.id)]};
+const QUICK={drop:["Price Drop",p=>priceInfo(p).kind==="good",ICON.trend.replace('width="12" height="12"','width="16" height="16"')],deal:["Crazy Deal",p=>p.disc>=50,ICON.flame],top:["Top Rated",p=>p.rating>=4.4,ICON.star2],fast:["Delivery in 2 days",p=>p.days<=2],wish:["In my wishlist",p=>Store.isWish(p.id)]};
 const TOPQ=["drop","deal","top"];
-const PRICES=[["u15","Under ₹1,500",0,1499],["m","₹1,500 – ₹2,000",1500,2000],["m2","₹2,000 – ₹1,500",2000,3000],["o3","Above ₹1,500",3001,1e9]];
+const PRICES=[["a","Under ₹500",0,499],["b","₹500 – ₹799",500,799],["c","₹800 – ₹1,299",800,1299],["d","Above ₹1,300",1300,1e9]];
 const TILES=[];
 const CIRCS=[];
 
@@ -17,7 +20,7 @@ const any=(a,v)=>!a.length||a.includes(v);
 function match(p,f=F){
   if(f.q){const t=(p.brand+" "+p.name+" "+p.style+" "+p.colors.map(c=>COLORS[c].name).join(" ")).toLowerCase();if(!f.q.toLowerCase().split(/\s+/).every(w=>t.includes(w)))return false}
   if(!f.quick.every(k=>QUICK[k][1](p)))return false;
-  if(!any(f.types,p.type)||!any(f.styles,p.style)||!any(f.brands,p.brand)||!any(f.fits,p.fit)||!any(f.fabrics,p.fabric)||!any(f.necks,p.neck))return false;
+  if(GEN&&p.g!==GEN&&p.g!=='all')return false;if(!any(f.types,p.type)||!any(f.styles,p.style)||!any(f.brands,p.brand)||!any(f.fits,p.fit)||!any(f.fabrics,p.fabric)||!any(f.necks,p.neck))return false;
   if(f.colors.length&&!p.colors.some(c=>f.colors.includes(c)))return false;
   if(f.price.length&&!f.price.some(k=>{const r=PRICES.find(x=>x[0]===k);return p.price>=r[2]&&p.price<=r[3]}))return false;
   if(f.disc&&p.disc<f.disc)return false;if(f.rating&&p.rating<f.rating)return false;if(f.ship&&p.days>f.ship)return false;
@@ -25,7 +28,7 @@ function match(p,f=F){
   return true}
 const results=(f=F)=>{const l=PRODUCTS.filter(p=>match(p,f));
   const s={pa:(a,b)=>a.price-b.price,pd:(a,b)=>b.price-a.price,disc:(a,b)=>b.disc-a.disc,rate:(a,b)=>b.rating-a.rating}[f.sort];if(s)l.sort(s);return l};
-const nOther=(f=F)=>f.quick.length+f.styles.length+f.colors.length+f.sizes.length+f.brands.length+f.price.length+(f.disc?1:0)+(f.rating?1:0)+(f.ship?1:0)+f.fits.length+f.fabrics.length+f.necks.length+f.types.length;
+const nOther=(f=F)=>f.quick.length+Math.max(0,f.styles.length-SC.styles.filter(x=>f.styles.includes(x)).length)+f.colors.length+f.sizes.length+f.brands.length+f.price.length+(f.disc?1:0)+(f.rating?1:0)+(f.ship?1:0)+f.fits.length+f.fabrics.length+f.necks.length+Math.max(0,f.types.length-SC.types.filter(x=>f.types.includes(x)).length);
 
 /* ---------- card ---------- */
 const heartBtn=(p,l)=>`<button class="heart" aria-pressed="${Store.isWish(p.id)}" aria-label="Add ${esc(l)} to wishlist"><span><svg width="13" height="12" viewBox="0 0 24 22"><path d="M12 20s-9-5.5-9-12.2A5 5 0 0112 5a5 5 0 019 2.8C21 14.5 12 20 12 20z"/></svg></span></button>`;
@@ -64,15 +67,18 @@ function render(){
   const list=results();
   $("#grid").innerHTML=list.length?list.map(cardHTML).join(""):(F.quick.includes("wish")&&!Store.get().wish.length&&nOther()===1?`<div class="empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.4"><circle cx="11" cy="11" r="7"/></svg><h2>Your wishlist is empty</h2><p>Tap the heart on any outfit you love and it will show up here.</p><button class="done" id="clr" style="width:auto;padding:0 28px">Start exploring</button></div>`:`<div class="empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M8.5 11h5"/></svg><h2>Nothing matches</h2><p>Try removing a filter or searching for something else.</p><button class="done" id="clr" style="width:auto;padding:0 28px">Clear all filters</button></div>`);
   $$(".card").forEach(c=>paintCta(c));initCarousels();
-  $("#count").textContent=`${list.length} ${list.length===1?"product":"products"}`;
+  $("#count").innerHTML=`<span class="ttl">${esc(pageTitle())}</span> <span class="n">(${list.length} ${list.length===1?"item":"items"})</span>`;
   const n=nOther();$("#fcount").textContent=n;$("#fcount").classList.toggle("on",n>0);
   $$("input[type=search]").forEach(i=>{if(document.activeElement!==i)i.value=F.q});$("#sort").value=F.sort;
   const pills=[];const L={sizes:s=>"Size "+s,colors:c=>COLORS[c].name,price:k=>PRICES.find(x=>x[0]===k)[1],quick:k=>QUICK[k][0]};
-  ["quick","types","styles","colors","sizes","brands","price","fits","fabrics","necks"].forEach(k=>F[k].forEach(v=>{if(k==="quick"&&TOPQ.includes(v))return pills.push([k,v,QUICK[v][0]]);pills.push([k,v,(L[k]?L[k](v):v)])}));
+  ["quick","types","styles","colors","sizes","brands","price","fits","fabrics","necks"].forEach(k=>F[k].forEach(v=>{if((k==="types"&&SC.types.includes(v))||(k==="styles"&&SC.styles.includes(v)))return;if(k==="quick"&&TOPQ.includes(v))return pills.push([k,v,QUICK[v][0]]);pills.push([k,v,(L[k]?L[k](v):v)])}));
   if(F.disc)pills.push(["disc",F.disc,F.disc+"% off or more"]);if(F.rating)pills.push(["rating",F.rating,F.rating+"★ & above"]);if(F.ship)pills.push(["ship",F.ship,"Delivery in "+F.ship+" days"]);if(F.q)pills.push(["q",F.q,"“"+F.q+"”"]);
   $("#active").innerHTML=pills.length?pills.map(([k,v,l])=>`<button class="pill" data-k="${k}" data-v="${esc(v)}" type="button" aria-label="Remove filter ${esc(l)}">${esc(l)}<i aria-hidden="true">×</i></button>`).join("")+`<button class="pill clear" id="clr2" type="button">Clear all</button>`:"";
   keep()}
-function clearAll(){F=Object.assign(F0(),{sort:F.sort});render();say("All filters cleared")}
+function pageTitle(){const u=new URLSearchParams(location.search),cat=u.get("cat"),st=u.get("style"),g=u.get("g");
+  if(u.get("wish"))return"Wishlist";if(u.get("q"))return"Results for “"+u.get("q")+"”";if(u.get("deal"))return"Sale";
+  if(st)return st;if(cat==="Clothing"&&g)return(g==="girls"?"Girls":"Boys")+" clothing";if(cat)return cat==="Toys"?"Toys & Games":cat;if(u.get("sort")==="rate")return"Bestsellers";return"All products"}
+function clearAll(){F=Object.assign(F0(),{sort:F.sort,types:SC.types.slice(),styles:SC.styles.slice()});render();say("All filters cleared")}
 
 /* ---------- carousel: dots follow scroll; desktop hover previews the close-up ---------- */
 const wide=matchMedia("(min-width:1024px) and (hover:hover)"),calm=matchMedia("(prefers-reduced-motion:reduce)");
@@ -85,6 +91,10 @@ function initCarousels(){$$(".media").forEach(m=>{const t=m.querySelector(".trac
  m.addEventListener("mouseleave",()=>{clearInterval(timer);if(wide.matches&&count(m)>1)t.scrollTo({left:0,behavior:"smooth"})});
  sync(m)})}
 
+/* ---------- direct add for non-clothing (no size needed) ---------- */
+function quickAdd(card){const p=byId(card.dataset.id),c=curColor(p),st=stockOf(p,c),L=p.sizes||SIZES,size=L.find(x=>st[x]>0)||L[0];
+  Store.add(p.id,c,size);toast(`${p.brand} ${p.name} added to cart`);say("Added to cart");
+  paintCta(card,size);clearTimeout(card._t);card._t=setTimeout(()=>paintCta(card),1500)}
 /* ---------- size sheet ---------- */
 function sizeSheet(card){const p=byId(card.dataset.id),c=curColor(p),st=stockOf(p,c);let size=null,dest="bag";
   openSheet({title:"Select size",html:`<div class="mini"><span class="th"><img src="${COLORS[c].img}" alt=""></span><div><b>${esc(p.brand)}</b><span>${esc(p.name)} · ${COLORS[c].name}</span><br><span>${INR(p.price)}</span></div></div>
@@ -127,13 +137,13 @@ function sortSheet(){openSheet({title:"Sort by",html:`<div class="rl" role="radi
 
 /* ---------- Filters page (draft until Apply) ---------- */
 const cntBy=(fn)=>PRODUCTS.filter(fn).length;
-const uniq=f=>[...new Set(PRODUCTS.map(f))];
+const uniq=f=>[...new Set(PRODUCTS.map(f))].filter(Boolean);
 function sections(){return[
  {k:"quick",l:"Quick Filters",opts:Object.keys(QUICK).map(k=>[k,QUICK[k][0],cntBy(p=>QUICK[k][1](p))])},
- {k:"sizes",l:"Size",opts:SIZES.map(s=>[s,s,cntBy(p=>p.colors.some(c=>stockOf(p,c)[s]>0))])},
+ {k:"sizes",l:"Clothing size",opts:SIZES.map(s=>[s,s,cntBy(p=>p.colors.some(c=>stockOf(p,c)[s]>0))])},
  {k:"colors",l:"Colour",swatch:1,opts:Object.keys(COLORS).map(c=>[c,COLORS[c].name,cntBy(p=>p.colors.includes(c))])},
  {k:"brands",l:"Brand",search:1,all:1,opts:uniq(p=>p.brand).map(b=>[b,b,cntBy(p=>p.brand===b)])},
- {k:"types",l:"Categories",opts:[["Sweatshirt","Sweatshirts"],["Hoodie","Hoodies"]].map(([v,l])=>[v,l,cntBy(p=>p.type===v)])},
+ {k:"types",l:"Category",opts:uniq(p=>p.type).map(v=>[v,v,cntBy(p=>p.type===v)])},
  {k:"styles",l:"Style",opts:uniq(p=>p.style).map(s=>[s,s,cntBy(p=>p.style===s)])},
  {k:"price",l:"Price Range",opts:PRICES.map(([k,l,a,b])=>[k,l,cntBy(p=>p.price>=a&&p.price<=b)])},
  {k:"disc",l:"Discount",single:1,opts:[30,40,50].map(v=>[v,v+"% and above",cntBy(p=>p.disc>=v)])},
@@ -199,6 +209,6 @@ document.addEventListener("click",e=>{
  if(h){const on=Store.toggleWish(card.dataset.id);$$(".heart",card).forEach(x=>{x.setAttribute("aria-pressed",on);x.classList.remove("pop");void x.offsetWidth;x.classList.add("pop")});say(on?"Saved to wishlist":"Removed from wishlist");return}
  const sw=e.target.closest(".sw button");if(sw)return setColor(card,sw.dataset.c);
  if(e.target.closest(".pc"))return priceSheet(card);
- const a=e.target.closest(".cta");if(a){if(a.classList.contains("bagged"))return location.href="cart.html";if(!a.classList.contains("added"))sizeSheet(card)}});
+ const a=e.target.closest(".cta");if(a){if(a.classList.contains("bagged"))return location.href="cart.html";if(!a.classList.contains("added")){const p=byId(card.dataset.id);if(catOf(p)==="Clothing")sizeSheet(card);else quickAdd(card)}}});
 render();
 document.addEventListener("group",renderRows);

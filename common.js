@@ -10,24 +10,56 @@ const COLORS={
   c2:{name:"Rainbow Stripe",hex:"#e9a93a",img:"assets/k2.jpg"},
   c3:{name:"Ocean Blue",hex:"#a9d3de",img:"assets/k3.jpg"},
   c4:{name:"Cream",hex:"#efe4cf",img:"assets/k4.jpg"},
-  c5:{name:"Denim Blue",hex:"#4f7cac",img:"assets/k5.jpg"}
+  c5:{name:"Denim Blue",hex:"#4f7cac",img:"assets/k5.jpg"},
+  c6:{name:"Natural wood",hex:"#d8b98a",img:"assets/ph-fruit.jpg"},
+  c7:{name:"Blush",hex:"#f4b6a8",img:"assets/ph-bunny.jpg"},
+  c8:{name:"Marmalade",hex:"#e8932a",img:"assets/ph-cat.jpg"},
+  c9:{name:"Natural wood",hex:"#d8b98a",img:"assets/ph-doctor.jpg"},
+  c10:{name:"Mint",hex:"#bfe8d6",img:"assets/ph-wash.jpg"},
+  c11:{name:"Peach",hex:"#f1c2b2",img:"assets/ph-balm.jpg"},
+  c12:{name:"Butter yellow",hex:"#f6e08a",img:"assets/ph-lotion.jpg"},
+  c13:{name:"Natural",hex:"#d9c3a0",img:"assets/ph-bathset.jpg"},
+  c14:{name:"Grey",hex:"#aab0cf",img:"assets/ph-elephantbag.jpg"},
+  c15:{name:"Navy",hex:"#1f3a5f",img:"assets/ph-navycap.jpg"},
+  c18:{name:"Dusty pink",hex:"#d98c9b",img:"assets/ph-unicornbag.jpg"},
+  c19:{name:"Mauve & blue",hex:"#c99aa0",img:"assets/ph-frogcap.jpg"},
+  c16:{name:"Cream",hex:"#efe9dd",img:"assets/ph-laundry.jpg"},
+  c17:{name:"Oatmeal",hex:"#e5d9c3",img:"assets/ph-elephant.jpg"}
 };
-const P=(id,brand,name,type,style,mrp,price,colors,trend,rating,reviews,fit,fabric,neck,days)=>({id:String(id),brand,name,type,style,mrp,price,colors,trend,rating,reviews,fit,fabric,neck,days});
+const P=(id,brand,name,type,style,mrp,price,colors,trend,rating,reviews,fit,fabric,neck,days,extra)=>({id:String(id),brand,name,type,style,mrp,price,colors,trend,rating,reviews,fit,fabric,neck,days,...extra});
+/* categories: key = product.type */
+const CATS=[["Clothing","Set|Dress"],["Toys","Toys"],["Personal care","Personal care"],["Gifts","Gifts"],["Accessories","Accessories"]];
+const catOf=p=>p.cat||"Clothing";
 const PRODUCTS=[
   P(1,"H&M Kids","Doodle Cars Polo & Denim Shorts Set","Set","Polo sets",1299,799,["c1"],"low",4.5,2300,"Regular","Cotton","Polo",2),
   P(2,"Pepe Jeans Kids","Rainbow Stripe Tee & Denim Shorts","Set","Polo sets",1499,899,["c2"],"avg",4.3,1200,"Regular","Cotton","Polo",2),
   P(3,"Levis Kids","Little Ocean Dungaree Set","Set","Dungarees",1399,849,["c3"],"low",4.6,860,"Relaxed","Cotton","Dungaree",3),
   P(4,"H&M Kids","Embroidered Collar Button Dress","Dress","Dresses",1599,999,["c4"],"high",4.4,940,"Regular","Cotton blend","Collar",2),
-  P(5,"Levis Kids","Distressed Denim Jacket & Shorts","Set","Denim sets",1999,1299,["c5"],"avg",4.2,410,"Regular","Denim","Jacket",3)
+  P(5,"Levis Kids","Distressed Denim Jacket & Shorts","Set","Denim sets",1999,1299,["c5"],"avg",4.2,410,"Regular","Denim","Jacket",3),
+  P(6,"Playroo","Wooden Fruit Cutting Set","Toys","Pretend play",899,539,["c6"],"low",4.7,1800,"","Beech wood","",2,{cat:"Toys",age:"2+ yrs",sizes:["Standard"],note:"Velcro-cut fruits and a child-safe wooden knife"}),
+  P(7,"Playroo","Plush Bunny Doll in Floral Dress","Toys","Soft toys",1199,719,["c7"],"avg",4.6,2100,"","Cotton","",3,{cat:"Toys",age:"0+ yrs",sizes:["30 cm","45 cm"],note:"Hypoallergenic stuffing"}),
+  P(8,"Zoomies","Pull-Along Wooden Cat","Toys","Pull toys",599,299,["c8"],"low",4.3,960,"","Beech wood","",2,{cat:"Toys",age:"1+ yrs",sizes:["Standard"],note:"Smooth rounded edges, water-based paints"}),
+  P(9,"Playroo","Wooden Doctor Set","Toys","Pretend play",999,649,["c9"],"avg",4.5,1300,"","Beech wood","",3,{cat:"Toys",age:"3+ yrs",sizes:["Standard"],note:"Doctor kit with carry case and 12 pieces"}),
+  P(10,"Bubbly","Head-to-Toe Baby Wash","Personal care","Bath & body",449,314,["c10"],"low",4.6,3400,"","Plant-based","",2,{cat:"Personal care",age:"0+ yrs",sizes:["200 ml","500 ml"],note:"Tear-free, dermatologically tested"}),
+  P(11,"Sunny Skin","Nappy-Happy Anti-Rash Balm","Personal care","Baby care",599,419,["c11"],"avg",4.4,1700,"","Plant-based","",2,{cat:"Personal care",age:"0+ yrs",sizes:["50 g","100 g"],note:"Soothing cocoa butter with Vitamin E"}),
+  P(12,"Bubbly","Butter-Bean Baby Lotion","Personal care","Bath & body",399,279,["c12"],"low",4.5,2600,"","Plant-based","",2,{cat:"Personal care",age:"0+ yrs",sizes:["200 ml","400 ml"],note:"24-hour moisture, fragrance free"}),
+  P(13,"Giftly","Baby Bath Gift Set","Gifts","Gift sets",1499,899,["c13"],"high",4.7,640,"","Mixed","",3,{cat:"Gifts",age:"0+ yrs",sizes:["Standard"],note:"Wash, shampoo, lotion, sponge and a woven pouch"}),
+  P(14,"Tote & Co","Elephant Plush Backpack","Accessories","Bags",1299,779,["c14"],"avg",4.4,880,"","Soft plush fabric","",3,{cat:"Accessories",age:"2–6 yrs",sizes:["Standard"],note:"Padded straps, zip pocket and a hug-able elephant"}),
+  P(16,"Bubbly","Clean-Bean Laundry Liquid","Personal care","Baby care",549,399,["c16"],"low",4.5,980,"","Plant-based","",2,{cat:"Personal care",age:"0+ yrs",sizes:["1 L","2 L"],note:"Gentle 2-in-1 formula with fabric conditioner"}),
+  P(17,"Playroo","Plush Elephant in Dungarees","Toys","Soft toys",1199,799,["c17"],"avg",4.6,740,"","Cotton","",3,{cat:"Toys",age:"0+ yrs",sizes:["30 cm","45 cm"],note:"Hand-finished, fully washable"}),
+  P(18,"Zoey Kids","Unicorn Corduroy Backpack","Accessories","Bags",1499,999,["c18"],"avg",4.6,620,"","Cotton corduroy","",3,{cat:"Accessories",age:"3–8 yrs",sizes:["Standard"],note:"Embroidered unicorn, padded straps and side bottle pocket"}),
+  P(19,"Tote & Co","Frog Print Cap","Accessories","Caps",499,349,["c19"],"low",4.4,410,"","Cotton twill","",2,{cat:"Accessories",age:"2–8 yrs",sizes:["S (2–4Y)","M (5–8Y)"],note:"Soft rubber frog charm, adjustable strap"}),
+  P(15,"Tote & Co","Everyday Sports Cap","Accessories","Caps",499,299,["c15"],"low",4.2,530,"","Cotton twill","",2,{cat:"Accessories",age:"3–10 yrs",sizes:["S (3–6Y)","M (7–10Y)"],note:"Breathable, adjustable strap"})
 ];
+PRODUCTS.forEach(p=>{p.g=catOf(p)==='Clothing'?(+p.id===4?'girls':'boys'):'all'});
 PRODUCTS.forEach(p=>p.disc=Math.floor((p.mrp-p.price)/p.mrp*100));
 const byId=id=>PRODUCTS.find(p=>p.id===String(id));
 const fmtK=n=>n>=1000?(n/1000).toFixed(1).replace(/\.0$/,"")+"k":String(n);
 
 const hash=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
-function stockOf(p,c){const o={};SIZES.forEach(s=>{const v=hash(p.id+c+s)%11;o[s]=s===SIZES[0]?(v>8?v-8:0):(v<2?0:v-1)});
-  if(p.id%3===0||p.id==="5"){SIZES.forEach(s=>o[s]=Math.min(o[s],2))}
-  if(!SIZES.some(s=>o[s]))o[SIZES[3]]=2;return o}
+function stockOf(p,c){const L=p.sizes||SIZES,o={};L.forEach((s,i)=>{const v=hash(p.id+c+s)%11;o[s]=i===0&&!p.sizes?(v>8?v-8:0):(v<2?0:v-1)});
+  if(p.id%3===0||p.id==="5"){L.forEach(s=>o[s]=Math.min(o[s],2))}
+  if(!L.some(s=>o[s]))o[L[Math.min(3,L.length-1)]]=2;return o}
 const stockTotal=(p,c)=>Object.values(stockOf(p,c)).reduce((a,b)=>a+b,0);
 const LOW=6;
 
@@ -145,7 +177,7 @@ function renderHeader({page=""}={}){
     openSheet({title:"Account",html:`<div class="acct"><span class="avatar lg">${esc(u.name[0].toUpperCase())}</span><div><b>${esc(u.name)}</b><p>${esc(u.id)}</p></div></div><div class="sheet-foot"><button class="done" id="so">Sign out</button></div>`,
       onMount:(el,close)=>$("#so",el).onclick=()=>{Store.signOut();close();toast("Signed out")}})};
   $$("[data-search]").forEach(f=>{f.addEventListener("submit",e=>e.preventDefault());
-    f.querySelector("input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!document.body.dataset.listing)location.href="index.html?q="+encodeURIComponent(e.target.value)})})}
+    f.querySelector("input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!document.body.dataset.listing)location.href="shop.html?q="+encodeURIComponent(e.target.value)})})}
 function say(t){const l=$("#live");if(l){l.textContent="";setTimeout(()=>l.textContent=t,30)}}
 
 /* Delivery-location bar + pincode sheet */
